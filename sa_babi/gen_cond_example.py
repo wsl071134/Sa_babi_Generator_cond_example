@@ -41,28 +41,24 @@ def gen_cond_example():
         instance_str (str): str of code example
         tags (list of Tag): tag for each line representing buffer safety
     """
-
     # 生成10个随机的变量名
     anon_vars = _get_anon_vars()
     # 给模板中所有的变量赋值
-    buf_var, s1_var, s2_var, s3_var, s4_var, idx_var, thresh_var, max_var = anon_vars[:8]  # 获取前三个变量名 缓存变量，索引变量 阈值变量
-    buf_len = random.randrange(MAX_IDX)  # 随机获取一个缓存的长度
-    idx_init = random.randrange(MAX_IDX)  # 随机获取一个初始索引
-    thresh = random.randrange(MAX_IDX)  # 随机获取一个合法阈值索引
+    array_var, lcmp_var, rcmp_var = anon_vars[:3]  # 获取前三个变量名 缓存变量，索引变量 阈值变量
+    array_len = random.randrange(MAX_IDX)  # 随机获取一个缓存的长度
+    lcmp_init = random.randrange(MAX_IDX)  # 随机获取一个初始索引
+    rcmp_init = random.randrange(MAX_IDX)  # 随机获取一个合法阈值索引
     true_idx = random.randrange(MAX_IDX)  # 正确的索引
     false_idx = random.randrange(MAX_IDX)  # 错误的索引
-    max_idx = random.randrange(MAX_IDX)
     substitutions = {
-        'buf_var': buf_var,  # 缓存变量
-        'idx_var': idx_var,  # 索引变量即为最终索引的索引值
-        'max_var': max_var,
-        'buf_len': buf_len,  # 缓存长度
-        'thresh': thresh,  # 阈值
-        'thresh_var': thresh_var,  # 阈值变量
-        'idx_init': idx_init,  # 初始索引
+        'array_var': array_var,  # 缓存变量
+        'lcmp_var': lcmp_var,  # 索引变量即为最终索引的索引值
+        'array_len': array_len,  # 缓存长度
+        'rcmp_init': rcmp_init,  # 阈值
+        'rcmp_var': rcmp_var,  # 阈值变量
+        'lcmp_init': lcmp_init,  # 初始索引
         'true_idx': true_idx,  # 正确索引
-        'false_idx': false_idx,  # 错误索引
-        'max_idx': max_idx,
+        'false_idx': false_idx  # 错误索引
     }
 
     # 主条件语句模板
@@ -81,7 +77,7 @@ def gen_cond_example():
 
 # 返回MAX_NUM_VARS个变量名
 def _get_anon_vars():
-    """Get list of unique, anonymized variable names in random order
+    """生成变量名
     Returns:
         anon_vars (list of str)
     """
@@ -92,21 +88,7 @@ def _get_anon_vars():
 
 # 将声明和定义语句对排好。因为字符数组只声明，不赋值。则用None表示
 def _get_setup_lines(dec_init_pairs):
-    """Get setup lines (declaring and initializing variables) in random order
-    so that variables are declared before initialized. If the second entry of
-    the tuple is None, this line only needs to be declared, not initialized,
-    e.g. for char arrays.
-
-    The point of this is that the variables collectively can be declared
-    and initialized in any order, as long as each variable is declared
-    before it is initialized.
-
-    E.g. dec_init_pairs = [("int $idx_var;", "$idx_var = $idx_init;"),
-                           ("char $buf_var[$buf_len];", None)]
-         _get_setup_lines(dec_init_pairs) could be any of
-         ["int $idx_var;", "$idx_var = $idx_init;", "char $buf_var[$buf_len];"]
-         ["int $idx_var;", "char $buf_var[$buf_len];", "$idx_var = $idx_init;"]
-         ["char $buf_var[$buf_len];", "int $idx_var;", "$idx_var = $idx_init;"]
+    """变量定义及初始化
 
     Args:
         dec_init_pairs (list of tuple)
@@ -178,7 +160,7 @@ def _generate_file_name(instance_str):
     """generate filename according to instance_str"""
     byte_obj = bytes(instance_str, 'utf-8')
     fname = hashlib.shake_128(byte_obj).hexdigest(FNAME_HASHLEN)
-    fname = "{}.c".format(fname)
+    fname = "{}.cpp".format(fname)
     return fname
 
 
